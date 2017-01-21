@@ -3,6 +3,7 @@ package bonsai.dev.ggj2017.menu;
 import bonsai.dev.ggj2017.GameScreen;
 import bonsai.dev.ggj2017.WavesGame;
 import com.badlogic.gdx.*;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerAdapter;
 import com.badlogic.gdx.controllers.Controllers;
@@ -24,6 +25,8 @@ public class MenuScreen extends ScreenAdapter {
     private LinkedList<MenuItem> menuItems;
     private BitmapFont font;
     private Texture logoTexture;
+    private Sound switchAudio;
+    private Sound bgAudio;
 
     private MenuItem selectedItem;
 
@@ -31,8 +34,9 @@ public class MenuScreen extends ScreenAdapter {
         this.game = game;
 
         font = new BitmapFont();
-
         logoTexture = new Texture(Gdx.files.internal("Logo.png"));
+        switchAudio = Gdx.audio.newSound(Gdx.files.internal("key.ogg"));
+        bgAudio = Gdx.audio.newSound(Gdx.files.internal("Ove Melaa - Heaven Sings.mp3"));
 
         menuItems = new LinkedList<MenuItem>();
 
@@ -87,6 +91,7 @@ public class MenuScreen extends ScreenAdapter {
     @Override
     public void show() {
         Gdx.app.log("MENU", "Show");
+        bgAudio.play(0.2f);
     }
 
     @Override
@@ -128,6 +133,7 @@ public class MenuScreen extends ScreenAdapter {
 
             if (item.isSelected() && prevItem != null) {
                 prevItem.select();
+                switchAudio.play(1.0f);
                 selectedItem = prevItem;
                 item.deselect();
             }
@@ -150,6 +156,7 @@ public class MenuScreen extends ScreenAdapter {
                 selectNext = true;
             } else if (selectNext) {
                 item.select();
+                switchAudio.play(1.0f);
                 selectedItem = item;
                 selectNext = false;
             }
