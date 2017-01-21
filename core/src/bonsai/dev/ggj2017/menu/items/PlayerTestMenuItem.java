@@ -1,4 +1,7 @@
-package bonsai.dev.ggj2017.menu;
+package bonsai.dev.ggj2017.menu.items;
+
+import bonsai.dev.ggj2017.menu.MenuItem;
+import bonsai.dev.ggj2017.menu.MenuScreen;
 
 /**
  * Created by Matthias on 20.01.17.

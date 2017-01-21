@@ -12,16 +12,19 @@ public class PlayerTestScreen extends ScreenAdapter{
 
     private WavesGame game;
     private Stage stage;
+    private Player player;
 
     public PlayerTestScreen(WavesGame game) {
         this.game = game;
 
         stage = new Stage(new ScreenViewport());
+        player = new Player();
     }
 
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
+        stage.addActor(player);
     }
 
     @Override

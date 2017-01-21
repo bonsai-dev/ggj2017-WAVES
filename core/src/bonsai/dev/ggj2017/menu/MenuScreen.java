@@ -2,29 +2,34 @@ package bonsai.dev.ggj2017.menu;
 
 import bonsai.dev.ggj2017.GameScreen;
 import bonsai.dev.ggj2017.WavesGame;
+import bonsai.dev.ggj2017.menu.items.*;
 import bonsai.dev.ggj2017.playertest.PlayerTestScreen;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerAdapter;
 import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.controllers.mappings.Xbox;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
-import java.awt.*;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 public class MenuScreen extends ScreenAdapter {
 
     private WavesGame game;
 
     private LinkedList<MenuItem> menuItems;
+    private MenuItem selectedItem;
+
+    private Viewport viewport;
+    private Camera camera;
+
+    private SpriteBatch batch;
 
     private BitmapFont font;
     private Texture logoTexture;
@@ -34,10 +39,17 @@ public class MenuScreen extends ScreenAdapter {
     private InputAdapter inputAdapter;
     private ControllerAdapter controllerAdapter;
 
-    private MenuItem selectedItem;
-
     public MenuScreen(WavesGame game) {
         this.game = game;
+
+        batch = new SpriteBatch();
+
+        // viewport
+        camera = new OrthographicCamera();
+        viewport = new FitViewport(1280, 720, camera);
+        viewport.apply();
+
+        camera.position.set(camera.viewportWidth / 2, camera.viewportHeight /  2, 0);
 
         // assets
         font = new BitmapFont();
@@ -90,8 +102,8 @@ public class MenuScreen extends ScreenAdapter {
         selectedItem = startMenuItem;
 
         menuItems.add(startMenuItem);
-        menuItems.add(new HighscoreMenuItem(this));
         menuItems.add(new PlayerTestMenuItem(this));
+        menuItems.add(new HighscoreMenuItem(this));
         menuItems.add(new OptionsMenuItem(this));
         menuItems.add(new ExitMenuItem(this));
     }
@@ -117,13 +129,20 @@ public class MenuScreen extends ScreenAdapter {
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        int startPos = 400;
+        camera.update();
 
-        game.batch.begin();
+        int menuStartPos = 400;
 
-        float logoMulti = 0.4f;
+        batch.begin();
+        batch.setProjectionMatrix(camera.combined);
 
-        game.batch.draw(logoTexture, 150, 140, logoTexture.getWidth() * logoMulti, logoTexture.getHeight() * logoMulti);
+        float logoPadding = 50f;
+
+        batch.draw(
+                logoTexture,
+                camera.viewportWidth - logoTexture.getWidth() - logoPadding,
+                camera.viewportHeight - logoTexture.getHeight() - logoPadding
+        );
 
         for (MenuItem item : menuItems) {
             font.setColor(0, 0, 0, 1);
@@ -132,12 +151,12 @@ public class MenuScreen extends ScreenAdapter {
                 font.setColor(1, 0, 0, 1);
             }
 
-            font.draw(game.batch, item.getName(), 40, startPos);
-            startPos -= 30;
+            font.draw(batch, item.getName(), 40, menuStartPos);
+            menuStartPos -= 30;
         }
 
 
-        game.batch.end();
+        batch.end();
     }
 
     private void menuSelect() {
@@ -187,7 +206,6 @@ public class MenuScreen extends ScreenAdapter {
         game.setScreen(new GameScreen());
     }
 
-    
     public void exit() {
         Gdx.app.exit();
     }
@@ -202,5 +220,10 @@ public class MenuScreen extends ScreenAdapter {
         switchAudio.dispose();
         logoTexture.dispose();
         font.dispose();
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        viewport.update(width, height);
     }
 }

@@ -1,4 +1,7 @@
-package bonsai.dev.ggj2017.menu;
+package bonsai.dev.ggj2017.menu.items;
+
+import bonsai.dev.ggj2017.menu.MenuItem;
+import bonsai.dev.ggj2017.menu.MenuScreen;
 
 public class StartMenuItem extends MenuItem {
 
