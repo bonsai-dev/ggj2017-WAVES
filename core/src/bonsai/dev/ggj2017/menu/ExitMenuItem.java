@@ -1,6 +1,6 @@
 package bonsai.dev.ggj2017.menu;
 
-public class ExitMenuItem implements MenuItem {
+public class ExitMenuItem extends MenuItem {
 
     private MenuScreen screen;
 

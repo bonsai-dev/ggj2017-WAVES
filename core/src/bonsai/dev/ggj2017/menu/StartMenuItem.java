@@ -1,12 +1,6 @@
 package bonsai.dev.ggj2017.menu;
 
-import bonsai.dev.ggj2017.WavesGame;
-import com.badlogic.gdx.Screen;
-
-/**
- * Created by Matthias on 20.01.17.
- */
-public class StartMenuItem implements MenuItem {
+public class StartMenuItem extends MenuItem {
 
     private MenuScreen screen;
 

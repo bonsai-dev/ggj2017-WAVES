@@ -3,7 +3,7 @@ package bonsai.dev.ggj2017.menu;
 /**
  * Created by Matthias on 20.01.17.
  */
-public class HighscoreMenuItem implements MenuItem {
+public class HighscoreMenuItem extends MenuItem {
 
     private MenuScreen screen;
 

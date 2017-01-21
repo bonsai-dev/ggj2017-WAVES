@@ -1,35 +1,48 @@
 package bonsai.dev.ggj2017.menu;
 
+import bonsai.dev.ggj2017.GameScreen;
 import bonsai.dev.ggj2017.WavesGame;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputAdapter;
-import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.ControllerAdapter;
 import com.badlogic.gdx.controllers.Controllers;
+import com.badlogic.gdx.controllers.PovDirection;
 import com.badlogic.gdx.controllers.mappings.Xbox;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
-public class MenuScreen implements Screen {
+public class MenuScreen extends ScreenAdapter {
 
     private WavesGame game;
-    private ArrayList<MenuItem> menuItems;
+    private LinkedList<MenuItem> menuItems;
     private BitmapFont font;
+    private Texture logoTexture;
 
+    private MenuItem selectedItem;
 
     public MenuScreen(WavesGame game) {
         this.game = game;
 
         font = new BitmapFont();
 
-        menuItems = new ArrayList<MenuItem>();
-        menuItems.add(new StartMenuItem(this));
+        logoTexture = new Texture(Gdx.files.internal("Logo.png"));
+
+        menuItems = new LinkedList<MenuItem>();
+
+        StartMenuItem startMenuItem = new StartMenuItem(this);
+        startMenuItem.select();
+        selectedItem = startMenuItem;
+
+        menuItems.add(startMenuItem);
+        menuItems.add(new HighscoreMenuItem(this));
+        menuItems.add(new OptionsMenuItem(this));
         menuItems.add(new ExitMenuItem(this));
 
         
@@ -42,6 +55,9 @@ public class MenuScreen implements Screen {
                 }
                 if (keycode == Input.Keys.UP) {
                     menuUp();
+                }
+                if (keycode == Input.Keys.ENTER) {
+                    menuSelect();
                 }
                 return true;
             }
@@ -57,6 +73,12 @@ public class MenuScreen implements Screen {
                 if (buttonIndex == Xbox.DPAD_UP) {
                     menuUp();
                 }
+
+                if (buttonIndex == 11) { // keymappings sind komisch...
+                    menuSelect();
+                }
+
+                Gdx.app.log("CONTROLLER", Integer.toString(buttonIndex));
                 return true;
             }
         });
@@ -69,17 +91,23 @@ public class MenuScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        Gdx.gl.glClearColor(1, 0, 1, 1);
+        Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         int startPos = 400;
 
         game.batch.begin();
 
-        Iterator<MenuItem> menuItemsIterator= menuItems.iterator();
+        float logoMulti = 0.4f;
 
-        while (menuItemsIterator.hasNext()) {
-            MenuItem item = menuItemsIterator.next();
+        game.batch.draw(logoTexture, 150, 140, logoTexture.getWidth() * logoMulti, logoTexture.getHeight() * logoMulti);
+
+        for (MenuItem item : menuItems) {
+            font.setColor(0, 0, 0, 1);
+
+            if (item.isSelected()) {
+                font.setColor(1, 0, 0, 1);
+            }
 
             font.draw(game.batch, item.getName(), 40, startPos);
             startPos -= 30;
@@ -89,42 +117,52 @@ public class MenuScreen implements Screen {
         game.batch.end();
     }
 
-    @Override
-    public void resize(int width, int height) {
-
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
-
+    private void menuSelect() {
+        selectedItem.action();
     }
 
     private void menuUp() {
+        MenuItem prevItem = null;
+
+        for (MenuItem item : menuItems) {
+
+            if (item.isSelected() && prevItem != null) {
+                prevItem.select();
+                selectedItem = prevItem;
+                item.deselect();
+            }
+
+            prevItem = item;
+        }
+
         Gdx.app.log("MENU", "Up");
     }
 
     private void menuDown() {
+        boolean selectNext = false;
+
+        Iterator<MenuItem> menuItemsIterator = menuItems.iterator();
+        while (menuItemsIterator.hasNext()) {
+            MenuItem item = menuItemsIterator.next();
+
+            if (item.isSelected() && menuItemsIterator.hasNext()) {
+                item.deselect();
+                selectNext = true;
+            } else if (selectNext) {
+                item.select();
+                selectedItem = item;
+                selectNext = false;
+            }
+        }
+
         Gdx.app.log("MENU", "Down");
     }
 
     public void startGame() {
-        Gdx.app.log("MENU", "StartScreen");
+        Gdx.app.log("MENU", "StartGame");
+        game.setScreen(new GameScreen());
     }
+
     
     public void exit() {
         Gdx.app.log("MENU", "Exit");
