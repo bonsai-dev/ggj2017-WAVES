@@ -2,6 +2,7 @@ package bonsai.dev.ggj2017.menu;
 
 import bonsai.dev.ggj2017.GameScreen;
 import bonsai.dev.ggj2017.WavesGame;
+import bonsai.dev.ggj2017.playertest.PlayerTestScreen;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.controllers.Controller;
@@ -22,36 +23,30 @@ import java.util.List;
 public class MenuScreen extends ScreenAdapter {
 
     private WavesGame game;
+
     private LinkedList<MenuItem> menuItems;
+
     private BitmapFont font;
     private Texture logoTexture;
     private Sound switchAudio;
     private Sound bgAudio;
+
+    private InputAdapter inputAdapter;
+    private ControllerAdapter controllerAdapter;
 
     private MenuItem selectedItem;
 
     public MenuScreen(WavesGame game) {
         this.game = game;
 
+        // assets
         font = new BitmapFont();
         logoTexture = new Texture(Gdx.files.internal("Logo.png"));
         switchAudio = Gdx.audio.newSound(Gdx.files.internal("key.ogg"));
         bgAudio = Gdx.audio.newSound(Gdx.files.internal("Ove Melaa - Heaven Sings.mp3"));
 
-        menuItems = new LinkedList<MenuItem>();
-
-        StartMenuItem startMenuItem = new StartMenuItem(this);
-        startMenuItem.select();
-        selectedItem = startMenuItem;
-
-        menuItems.add(startMenuItem);
-        menuItems.add(new HighscoreMenuItem(this));
-        menuItems.add(new OptionsMenuItem(this));
-        menuItems.add(new ExitMenuItem(this));
-
-        
-        Gdx.input.setInputProcessor(new InputAdapter() {
-
+        // controls
+        inputAdapter = new InputAdapter() {
             @Override
             public boolean keyUp(int keycode) {
                 if (keycode == Input.Keys.DOWN) {
@@ -65,9 +60,9 @@ public class MenuScreen extends ScreenAdapter {
                 }
                 return true;
             }
-        });
+        };
 
-        Controllers.addListener(new ControllerAdapter() {
+        controllerAdapter = new ControllerAdapter() {
             @Override
             public boolean buttonDown(Controller controller, int buttonIndex) {
                 if (buttonIndex == Xbox.DPAD_DOWN) {
@@ -85,13 +80,36 @@ public class MenuScreen extends ScreenAdapter {
                 Gdx.app.log("CONTROLLER", Integer.toString(buttonIndex));
                 return true;
             }
-        });
+        };
+
+        // menu
+        menuItems = new LinkedList<MenuItem>();
+
+        StartMenuItem startMenuItem = new StartMenuItem(this);
+        startMenuItem.select();
+        selectedItem = startMenuItem;
+
+        menuItems.add(startMenuItem);
+        menuItems.add(new HighscoreMenuItem(this));
+        menuItems.add(new PlayerTestMenuItem(this));
+        menuItems.add(new OptionsMenuItem(this));
+        menuItems.add(new ExitMenuItem(this));
     }
 
     @Override
     public void show() {
-        Gdx.app.log("MENU", "Show");
         bgAudio.play(0.2f);
+
+        Gdx.input.setInputProcessor(inputAdapter);
+        Controllers.addListener(controllerAdapter);
+    }
+
+    @Override
+    public void hide() {
+        bgAudio.stop();
+
+        Gdx.input.setInputProcessor(null);
+        Controllers.removeListener(controllerAdapter);
     }
 
     @Override
@@ -166,14 +184,23 @@ public class MenuScreen extends ScreenAdapter {
     }
 
     public void startGame() {
-        Gdx.app.log("MENU", "StartGame");
         game.setScreen(new GameScreen());
     }
 
     
     public void exit() {
-        Gdx.app.log("MENU", "Exit");
         Gdx.app.exit();
     }
 
+    public void startPlayerTest() {
+        game.setScreen(new PlayerTestScreen(game));
+    }
+
+    @Override
+    public void dispose() {
+        bgAudio.dispose();
+        switchAudio.dispose();
+        logoTexture.dispose();
+        font.dispose();
+    }
 }
