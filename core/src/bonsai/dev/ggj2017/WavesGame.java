@@ -12,7 +12,7 @@ public class WavesGame extends Game {
     @Override
     public void create () {
         batch = new SpriteBatch();
-        this.setScreen(new MenuScreen(this));
+        this.setScreen(new GameScreen());
     }
 
     @Override
