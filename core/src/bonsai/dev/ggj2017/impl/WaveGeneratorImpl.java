@@ -6,9 +6,6 @@ import bonsai.dev.ggj2017.WaveGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by kaso on 1/20/17.
- */
 public class WaveGeneratorImpl implements WaveGenerator {
 
     private float xPos;
