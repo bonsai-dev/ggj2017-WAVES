@@ -1,7 +1,6 @@
 package bonsai.dev.ggj2017.impl;
 
 import bonsai.dev.ggj2017.Wave;
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 
@@ -12,13 +11,15 @@ public class WaveImpl implements Wave {
     private float waveSpread;
     private float widthPos;
     private float heightPos;
+    private Color color;
 
-    public WaveImpl(float widthPos, float heightPos) {
+    public WaveImpl(float widthPos, float heightPos, Color color) {
         this.size = 0f;
-        this.waveSpread = 20f;
+        this.waveSpread = 30f;
         this.speed = 20f;
         this.heightPos = heightPos;
         this.widthPos = widthPos;
+        this.color = color;
     }
 
     @Override
@@ -31,7 +32,7 @@ public class WaveImpl implements Wave {
         size += deltaTime * speed;
         float innerSize = size-waveSpread;
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(Color.RED);
+        shapeRenderer.setColor(color);
         shapeRenderer.circle(widthPos, heightPos, size, calcSegments(size));
         if(size > waveSpread) {
             shapeRenderer.circle(widthPos, heightPos, innerSize, calcSegments(innerSize));
@@ -54,4 +55,6 @@ public class WaveImpl implements Wave {
     public float getSize() {
         return size;
     }
+
+
 }
