@@ -74,7 +74,7 @@ public class MenuScreen extends ScreenAdapter {
                     menuUp();
                 }
 
-                if (buttonIndex == 11) { // keymappings sind komisch...
+                if (buttonIndex == Xbox.A) {
                     menuSelect();
                 }
 
@@ -166,6 +166,7 @@ public class MenuScreen extends ScreenAdapter {
     
     public void exit() {
         Gdx.app.log("MENU", "Exit");
+        Gdx.app.exit();
     }
 
 }

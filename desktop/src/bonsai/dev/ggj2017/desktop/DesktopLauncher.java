@@ -7,6 +7,9 @@ import bonsai.dev.ggj2017.WavesGame;
 public class DesktopLauncher {
 	public static void main (String[] arg) {
 		LwjglApplicationConfiguration config = new LwjglApplicationConfiguration();
+
+		config.forceExit = false;
+
 		new LwjglApplication(new WavesGame(), config);
 	}
 }
