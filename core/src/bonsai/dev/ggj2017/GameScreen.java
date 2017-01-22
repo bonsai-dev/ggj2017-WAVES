@@ -4,10 +4,9 @@ import bonsai.dev.ggj2017.impl.WaveGeneratorImpl;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.Camera;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
@@ -17,32 +16,42 @@ import java.util.Iterator;
 import java.util.List;
 
 public class GameScreen implements Screen {
-    ShapeRenderer shapeRenderer;
-    int width;
-    int height;
-    WaveGenerator waveGenerator1;
-    List<Wave> waves;
-    List<Zone> zones;
-    boolean lastStateCovered;
-    Color dotColor;
-    Player player;
+    private ShapeRenderer shapeRenderer;
+    private SpriteBatch batch;
+    private int width;
+    private int height;
+    private WaveGenerator waveGenerator1;
+    private List<Wave> waves;
+    private List<Zone> zones;
+    private boolean lastStateCovered;
+    private Color dotColor;
+    private Player player;
 
-    WaveGenerator waveGenerator2;
-    WaveGenerator waveGenerator3;
+    private WaveGenerator waveGenerator2;
+    private WaveGenerator waveGenerator3;
 
     private Viewport viewport;
     private Camera camera;
 
+    private Texture damageOverlay;
+    private Sprite damageSprite;
+    private Color deathColor;
+    private Texture deathTextTex;
 
-    float damageTick;
+    private float damageTick;
 
 
     public GameScreen() {
         shapeRenderer = new ShapeRenderer();
+        batch = new SpriteBatch();
         //width = Gdx.app.getGraphics().getWidth();
         //height = Gdx.app.getGraphics().getHeight();
         width = 1280;
         height = 720;
+
+        damageOverlay = new Texture(Gdx.files.internal("DamageScreen.png"));
+        damageSprite = new Sprite(damageOverlay);
+        deathTextTex = new Texture(Gdx.files.internal("YoureDead.png"));
 
         // viewport
         camera = new OrthographicCamera();
@@ -66,6 +75,7 @@ public class GameScreen implements Screen {
         waveGenerator3.setColor(Color.YELLOW);
 
         dotColor = Color.BLUE;
+        deathColor = new Color(135f/256f, 1f/256f, 1f/256f, 0f);
 
         lastStateCovered = false;
 
@@ -88,6 +98,19 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         camera.update();
         shapeRenderer.setProjectionMatrix(camera.combined);
+        batch.setProjectionMatrix(camera.combined);
+        batch.enableBlending();
+
+        if(!player.isAlive()) {
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.rect(0, 0, width, height, deathColor, deathColor, deathColor, deathColor);
+            shapeRenderer.end();
+            batch.begin();
+            batch.draw(deathTextTex, width/2 - deathTextTex.getWidth()/2,
+                    height/2 - deathTextTex.getHeight()/2);
+            batch.end();
+            return;
+        }
 
         float newPlayerX = player.getPosX();
         float newPlayerY = player.getPosY();
@@ -161,9 +184,12 @@ public class GameScreen implements Screen {
         if(dotColor.equals(Color.RED) && player.isAlive()) {
             player.applyDamage(damageTick * delta);
         }
-        if(!player.isAlive()) {
-            Gdx.app.log("HEALTH", "Player is dead.");
-        }
+
+        batch.begin();
+        float alpha = 1f - 1f * (player.getHealth()/player.getMaxHealth());
+        damageSprite.setColor(1, 1, 1, alpha);
+        damageSprite.draw(batch, alpha);
+        batch.end();
     }
 
     private void wavesCleanup(List<Wave> waves) {
@@ -210,5 +236,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose () {
+        damageOverlay.dispose();
+        deathTextTex.dispose();
     }
 }
