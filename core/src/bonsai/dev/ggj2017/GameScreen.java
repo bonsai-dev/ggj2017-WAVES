@@ -4,9 +4,13 @@ import bonsai.dev.ggj2017.impl.WaveGeneratorImpl;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,19 +25,32 @@ public class GameScreen implements Screen {
     List<Zone> zones;
     boolean lastStateCovered;
     Color dotColor;
-    float playerX;
-    float playerY;
-    float playerSpeed;
+    Player player;
+
     WaveGenerator waveGenerator2;
     WaveGenerator waveGenerator3;
-    float playerHealth;
+
+    private Viewport viewport;
+    private Camera camera;
+
+
     float damageTick;
 
 
     public GameScreen() {
         shapeRenderer = new ShapeRenderer();
-        width = Gdx.app.getGraphics().getWidth();
-        height = Gdx.app.getGraphics().getHeight();
+        //width = Gdx.app.getGraphics().getWidth();
+        //height = Gdx.app.getGraphics().getHeight();
+        width = 1280;
+        height = 720;
+
+        // viewport
+        camera = new OrthographicCamera();
+        viewport = new FitViewport(width, height, camera);
+        viewport.apply();
+
+        camera.position.set(camera.viewportWidth / 2, camera.viewportHeight /  2, 0);
+
         waves = new ArrayList<Wave>();
         waveGenerator1 = new WaveGeneratorImpl(20, height);
         waveGenerator1.setEmissionSpeed(10);
@@ -51,10 +68,8 @@ public class GameScreen implements Screen {
         dotColor = Color.BLUE;
 
         lastStateCovered = false;
-        playerX = 100;
-        playerY = 100;
-        playerSpeed = 75;
-        playerHealth = 100;
+
+        player = new Player(100, 100);
 
         damageTick = 50;
 
@@ -71,21 +86,26 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        float prevPlayerX = playerX;
-        float prevPlayerY = playerY;
+        camera.update();
+        shapeRenderer.setProjectionMatrix(camera.combined);
+
+        float newPlayerX = player.getPosX();
+        float newPlayerY = player.getPosY();
         boolean playerInSafeZone = false;
         if(Gdx.input.isKeyPressed(Input.Keys.W)) {
-            playerY += delta * playerSpeed;
+            newPlayerY += delta * player.getSpeed();
         }
         if(Gdx.input.isKeyPressed(Input.Keys.A)) {
-            playerX -= delta * playerSpeed;
+            newPlayerX -= delta * player.getSpeed();
         }
         if(Gdx.input.isKeyPressed(Input.Keys.S)) {
-            playerY -= delta * playerSpeed;
+            newPlayerY -= delta * player.getSpeed();
         }
         if(Gdx.input.isKeyPressed(Input.Keys.D)) {
-            playerX += delta * playerSpeed;
+            newPlayerX += delta * player.getSpeed();
         }
+
+        player.moveToPosition(newPlayerX, newPlayerY);
 
         Gdx.gl.glClearColor(0, 0, 0, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -93,9 +113,10 @@ public class GameScreen implements Screen {
         //render zones
         for(Zone zone : zones) {
             zone.render(shapeRenderer);
-            if(zone.isInZone(playerX, playerY) && HealthZone.class.isAssignableFrom(zone.getClass())) {
+            if(zone.isInZone(player.getPosX(), player.getPosY())
+                    && HealthZone.class.isAssignableFrom(zone.getClass())) {
                 playerInSafeZone = true;
-                playerHealth = ((HealthZone) zone).applyHeal(playerHealth, delta);
+                ((HealthZone) zone).applyHeal(player, delta);
             }
         }
 
@@ -118,7 +139,7 @@ public class GameScreen implements Screen {
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(dotColor);
-        shapeRenderer.circle(playerX, playerY, 3);
+        shapeRenderer.circle(player.getPosX(), player.getPosY(), 3);
         shapeRenderer.end();
 
         wavesCleanup(waves);
@@ -126,7 +147,7 @@ public class GameScreen implements Screen {
         if(playerInSafeZone) {
             isCovered = true;
         } else {
-            isCovered = checkIsCoveredByAnyWave(playerX, playerY, waves);
+            isCovered = checkIsCoveredByAnyWave(player.getPosX(), player.getPosY(), waves);
         }
         if(isCovered != lastStateCovered) {
             lastStateCovered = isCovered;
@@ -137,10 +158,10 @@ public class GameScreen implements Screen {
             }
         }
 
-        if(dotColor.equals(Color.RED) && playerHealth > 0) {
-            playerHealth -= damageTick * delta;
+        if(dotColor.equals(Color.RED) && player.isAlive()) {
+            player.applyDamage(damageTick * delta);
         }
-        if(playerHealth < 0) {
+        if(!player.isAlive()) {
             Gdx.app.log("HEALTH", "Player is dead.");
         }
     }
@@ -169,7 +190,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
+        viewport.update(width, height);
     }
 
     @Override

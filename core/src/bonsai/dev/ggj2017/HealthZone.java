@@ -11,8 +11,8 @@ public class HealthZone extends Zone {
         super(anchorX, anchorY, width, height, color);
     }
 
-    float applyHeal(float inputValue, float deltaTime) {
-        return inputValue + healRate * deltaTime;
+    float applyHeal(Player player, float deltaTime) {
+        return player.applyHeal(healRate * deltaTime);
     }
 
 }
