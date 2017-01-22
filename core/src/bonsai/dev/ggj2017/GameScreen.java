@@ -39,6 +39,8 @@ public class GameScreen implements Screen {
 
     private float damageTick;
 
+    private Coin coin;
+
 
     public GameScreen() {
         shapeRenderer = new ShapeRenderer();
@@ -77,15 +79,17 @@ public class GameScreen implements Screen {
 
         lastStateCovered = false;
 
-        player = new Player(100, 100);
+        player = new Player(225, 225);
         player.setTexture(new Texture(Gdx.files.internal("Player.png")));
 
         damageTick = 50;
 
-        Zone healZone = new HealthZone(75, 75, 50, 50, Color.GREEN);
+        Zone healZone = new HealthZone(200, 200, 50, 50, Color.GREEN);
 
         zones = new ArrayList<Zone>();
         zones.add(healZone);
+
+        coin = new Coin(900, 500, new Texture(Gdx.files.internal("Item.png")));
     }
 
     @Override
@@ -163,7 +167,10 @@ public class GameScreen implements Screen {
             wave.render(shapeRenderer, delta);
         }
 
+        coin.render(batch);
+
         player.render(batch, shapeRenderer);
+
 
         wavesCleanup(waves);
         final boolean isCovered;
@@ -239,5 +246,6 @@ public class GameScreen implements Screen {
         damageOverlay.dispose();
         deathTextTex.dispose();
         player.dispose();
+        coin.dispose();
     }
 }
