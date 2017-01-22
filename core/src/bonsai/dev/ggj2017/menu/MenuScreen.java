@@ -61,10 +61,10 @@ public class MenuScreen extends ScreenAdapter {
         inputAdapter = new InputAdapter() {
             @Override
             public boolean keyUp(int keycode) {
-                if (keycode == Input.Keys.DOWN) {
+                if (keycode == Input.Keys.DOWN || keycode == Input.Keys.S) {
                     menuDown();
                 }
-                if (keycode == Input.Keys.UP) {
+                if (keycode == Input.Keys.UP || keycode == Input.Keys.W) {
                     menuUp();
                 }
                 if (keycode == Input.Keys.ENTER) {
