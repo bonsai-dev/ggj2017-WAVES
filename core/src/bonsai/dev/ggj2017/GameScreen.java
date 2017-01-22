@@ -115,16 +115,16 @@ public class GameScreen implements Screen {
         float newPlayerX = player.getPosX();
         float newPlayerY = player.getPosY();
         boolean playerInSafeZone = false;
-        if(Gdx.input.isKeyPressed(Input.Keys.W)) {
+        if(Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             newPlayerY += delta * player.getSpeed();
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.A)) {
+        if(Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             newPlayerX -= delta * player.getSpeed();
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.S)) {
+        if(Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             newPlayerY -= delta * player.getSpeed();
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.D)) {
+        if(Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             newPlayerX += delta * player.getSpeed();
         }
 
