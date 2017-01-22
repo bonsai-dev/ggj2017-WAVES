@@ -15,6 +15,7 @@ public class WaveGeneratorImpl implements WaveGenerator {
     private float timeBetweenEmissions;
     private float lastEmission;
     private Color color;
+    private boolean isFirstWave;
 
     public WaveGeneratorImpl(float xPos, float yPos) {
         this.xPos = xPos;
@@ -22,6 +23,7 @@ public class WaveGeneratorImpl implements WaveGenerator {
         this.lastEmission = 0f;
         this.timeBetweenEmissions = 10; //10 seconds
         this.color = Color.RED;
+        isFirstWave = true;
     }
 
     @Override
@@ -48,8 +50,13 @@ public class WaveGeneratorImpl implements WaveGenerator {
 
         lastEmission += deltaTime;
 
-        if(lastEmission >= timeBetweenEmissions) {
+        if(lastEmission >= timeBetweenEmissions || isFirstWave) {
             waves = new ArrayList<Wave>();
+            if(isFirstWave) {
+                isFirstWave = false;
+                lastEmission = 0;
+                waves.add(new WaveImpl(xPos, yPos, color));
+            }
             while(lastEmission > timeBetweenEmissions) {
                 WaveImpl wave = new WaveImpl(xPos, yPos, color);
                 waves.add(wave);

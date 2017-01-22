@@ -24,7 +24,6 @@ public class GameScreen implements Screen {
     private List<Wave> waves;
     private List<Zone> zones;
     private boolean lastStateCovered;
-    private Color dotColor;
     private Player player;
 
     private WaveGenerator waveGenerator2;
@@ -74,16 +73,16 @@ public class GameScreen implements Screen {
         waveGenerator3.turnOn();
         waveGenerator3.setColor(Color.YELLOW);
 
-        dotColor = Color.BLUE;
         deathColor = new Color(135f/256f, 1f/256f, 1f/256f, 0f);
 
         lastStateCovered = false;
 
         player = new Player(100, 100);
+        player.setTexture(new Texture(Gdx.files.internal("Player.png")));
 
         damageTick = 50;
 
-        Zone healZone = new HealthZone(15, 15, 50, 50, Color.GREEN);
+        Zone healZone = new HealthZone(75, 75, 50, 50, Color.GREEN);
 
         zones = new ArrayList<Zone>();
         zones.add(healZone);
@@ -117,15 +116,19 @@ public class GameScreen implements Screen {
         boolean playerInSafeZone = false;
         if(Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
             newPlayerY += delta * player.getSpeed();
+            player.setRotationDegrees(180f);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             newPlayerX -= delta * player.getSpeed();
+            player.setRotationDegrees(270f);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             newPlayerY -= delta * player.getSpeed();
+            player.setRotationDegrees(0f);
         }
         if(Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             newPlayerX += delta * player.getSpeed();
+            player.setRotationDegrees(90f);
         }
 
         player.moveToPosition(newPlayerX, newPlayerY);
@@ -160,10 +163,7 @@ public class GameScreen implements Screen {
             wave.render(shapeRenderer, delta);
         }
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(dotColor);
-        shapeRenderer.circle(player.getPosX(), player.getPosY(), 3);
-        shapeRenderer.end();
+        player.render(batch, shapeRenderer);
 
         wavesCleanup(waves);
         final boolean isCovered;
@@ -175,13 +175,13 @@ public class GameScreen implements Screen {
         if(isCovered != lastStateCovered) {
             lastStateCovered = isCovered;
             if(lastStateCovered) {
-                dotColor = Color.GREEN;
+                player.setHeadColor(Color.GREEN);
             } else {
-                dotColor = Color.RED;
+                player.setHeadColor(Color.RED);
             }
         }
 
-        if(dotColor.equals(Color.RED) && player.isAlive()) {
+        if(!isCovered && player.isAlive()) {
             player.applyDamage(damageTick * delta);
         }
 
@@ -238,5 +238,6 @@ public class GameScreen implements Screen {
     public void dispose () {
         damageOverlay.dispose();
         deathTextTex.dispose();
+        player.dispose();
     }
 }
